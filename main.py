@@ -22,9 +22,12 @@ def main(args):
     """
     arena = Tournament(args)
 
-    if   MODE == "ai_vs_ai":    arena.championship()
-    elif MODE == "man_vs_ai":   arena.single_game(black_starts=True)
-    else: assert False, "SHOULD NOT HAPPEN UNLESS YOU IMPLEMENT THE man_vs_man VERSION"
+    if MODE == "ai_vs_ai":
+        arena.championship()
+    elif MODE == "man_vs_ai":
+        arena.single_game(black_starts=True)
+    else:
+        assert False, "SHOULD NOT HAPPEN UNLESS YOU IMPLEMENT THE man_vs_man VERSION"
 
 
 if __name__ == "__main__":
@@ -37,10 +40,10 @@ if __name__ == "__main__":
         print("You will be playing as the [bold]BLACK player[/bold]!")
     else:
         MODE = "ai_vs_ai"
-        print("Ok, let the AI play alone.")    
+        print("Ok, let the AI play alone.")
 
-    BOARD_SIZE = 7
+    BOARD_SIZE = 3
     GAME_COUNT = 0
-    N_GAMES    = 1000 
+    N_GAMES = 2
 
-    main([ BOARD_SIZE, MODE, GAME_COUNT, N_GAMES ])
+    main([BOARD_SIZE, MODE, GAME_COUNT, N_GAMES])

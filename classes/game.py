@@ -6,6 +6,8 @@ from rich.table import Table
 
 from classes.logic import Logic
 from classes.ui import UI
+import time
+import tracemalloc
 
 
 class Game:
@@ -25,8 +27,8 @@ class Game:
         Finally, a dictionary-based "method/function" allows to retrieve the player based on the parity (even/odd) of the current step in the game.
         """
         # Select mode
-        self.modes = { "ai_vs_ai":  0,
-                       "man_vs_ai": 0 }
+        self.modes = {"ai_vs_ai": 0,
+                      "man_vs_ai": 0}
         self.modes[mode] = 1
 
         # Does BLACK player start?
@@ -39,10 +41,15 @@ class Game:
         # Initialize public variables
         self.node = None
         self.winner = None
-
+        self.black_player_moves = 0
+        self.white_player_moves = 0
+        self.black_player_time = 0
+        self.white_player_time = 0
+        self.black_player_memory_peak = 0
+        self.white_player_memory_peak = 0
         # Initialize dict-based "function"
-        self.turn = { True:  self.ui.BLACK_PLAYER, 
-                      False: self.ui.WHITE_PLAYER }
+        self.turn = {True: self.ui.BLACK_PLAYER,
+                     False: self.ui.WHITE_PLAYER}
 
     def get_game_info(self, args) -> None:
         """
@@ -78,7 +85,8 @@ class Game:
                     self.run_turn()
         elif self.modes["ai_vs_ai"]:
             self.run_turn()
-        else: assert False, "SHOULD NOT HAPPEN UNLESS YOU IMPLEMENT THE man_vs_man VERSION"
+        else:
+            assert False, "SHOULD NOT HAPPEN UNLESS YOU IMPLEMENT THE man_vs_man VERSION"
 
     def run_turn(self) -> None:
         """
@@ -86,9 +94,12 @@ class Game:
 
         @bug   Progress is not guaranteed by this procedure.
         """
-        if   self.modes["ai_vs_ai"]:    node = None
-        elif self.modes["man_vs_ai"]:   node = self.node
-        else: assert False, "SHOULD NOT HAPPEN UNLESS YOU IMPLEMENT THE man_vs_man VERSION"
+        if self.modes["ai_vs_ai"]:
+            node = None
+        elif self.modes["man_vs_ai"]:
+            node = self.node
+        else:
+            assert False, "SHOULD NOT HAPPEN UNLESS YOU IMPLEMENT THE man_vs_man VERSION"
 
         # BLACK player's turn
         if not self.check_move(node, self.turn[self.turn_state]):
@@ -107,7 +118,23 @@ class Game:
         @return   True iff there is a winner after the given (or rejected) move.
         """
         try:
+
+            tracemalloc.start()
+            start = time.time()
             self.winner = self.logic.get_action(node, player)
+            end = time.time()
+            current, peak = tracemalloc.get_traced_memory()
+            if player == self.ui.BLACK_PLAYER:
+                self.black_player_moves += 1
+                self.black_player_time += (end - start)
+                if (peak / 10 ** 6) > self.black_player_memory_peak:
+                    self.black_player_memory_peak = (peak / 10 ** 6)
+
+            else:
+                self.white_player_moves += 1
+                self.white_player_time += (end - start)
+                if (peak / 10 ** 6) > self.white_player_memory_peak:
+                    self.white_player_memory_peak = (peak / 10 ** 6)
         except AssertionError:
             return False
 

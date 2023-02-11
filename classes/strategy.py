@@ -58,8 +58,8 @@ class STRAT:
             # x, y = choice(self.logic.get_possible_moves(self.state))  # check for what is root_node
             # ((x, y), value) = self.minimax(root_node, self.starting_player, self.state)
             # (x, y) = self.play_minimax_alpha_beta_heuristic(root_node, 2)
-            (x, y) = self.play_minimax_alpha_beta(root_node)
-            # (x, y) = self.play_heuristic(root_node, self.longest_player_chain)
+            # (x, y) = self.play_minimax_alpha_beta(root_node)
+            (x, y) = self.play_heuristic(root_node, self.longest_player_chain)
         return (x, y)
 
     #######################

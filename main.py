@@ -42,7 +42,7 @@ if __name__ == "__main__":
         MODE = "ai_vs_ai"
         print("Ok, let the AI play alone.")
 
-    BOARD_SIZE = 3
+    BOARD_SIZE = 6
     GAME_COUNT = 0
     N_GAMES = 2
 

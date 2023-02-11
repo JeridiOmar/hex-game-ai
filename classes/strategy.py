@@ -426,7 +426,7 @@ class STRAT:
         return False
 
     ####
-    # Heuristic 4
+    # Heuristic 3
     # Longest chain: The length of the longest chain of each player .
     # A player with a longer chain is closer to winning, so this player is likely to have a higher score.
     ###

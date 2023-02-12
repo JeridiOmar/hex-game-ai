@@ -170,7 +170,7 @@ class STRAT:
         return bestmove
 
     def minimax_alpha_beta(self, node, player, board, alpha, beta):
-        print("Mid Game", -self.heuristic_evaluation2(board, player))
+        # print("Mid Game", -self.heuristic_evaluation2(board, player))
         if self.logic.is_game_over(self.ui.BLACK_PLAYER, board) == 1:
             self.logic.GAME_OVER = False
             return 1
@@ -467,7 +467,7 @@ class STRAT:
             root_node.add_child(Node(self.logic, new_board, move))
         for child in root_node.children:
             eval = heuristic(child.state, self.starting_player)
-            print(eval)
+            # print(eval)
             if eval > best_eval:
                 best_eval = eval
                 best_move = child.move

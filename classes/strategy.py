@@ -472,7 +472,7 @@ class STRAT:
 
 
     ###
-    # Bilal heurisitic
+    # Dijkstra heurisitic
     ###
 
     def graph_generator2(self, player: int):

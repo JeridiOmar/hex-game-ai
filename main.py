@@ -42,8 +42,8 @@ if __name__ == "__main__":
         MODE = "ai_vs_ai"
         print("Ok, let the AI play alone.")
 
-    BOARD_SIZE = 6
+    BOARD_SIZE = 5
     GAME_COUNT = 0
-    N_GAMES = 2
+    N_GAMES = 10
 
     main([BOARD_SIZE, MODE, GAME_COUNT, N_GAMES])

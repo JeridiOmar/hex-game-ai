@@ -46,7 +46,6 @@ class STRAT:
         self.count = 0
         self.dijkstra_graph = nx.Graph()
 
-
     def start(self) -> tuple:
         root_node = Node(self.logic, self.root_state)
 
@@ -62,7 +61,7 @@ class STRAT:
             # x, y = choice(self.logic.get_possible_moves(self.state))  # check for what is root_node
 
             # Play minimax
-            (x,y) = self.minimax(0)
+            # (x,y) = self.minimax(0)
 
             # Play minimax with pruning
             # (x, y) = self.play_minimax_alpha_beta(root_node)
@@ -74,7 +73,7 @@ class STRAT:
             # (x, y) = self.play_heuristic(root_node, self.longest_player_chain)
 
             # Play with the 4th heuristic (dijkstra)
-            # (x, y) = self.search_with_heuristic(0, 2)
+            (x, y) = self.search_with_heuristic(0, 2)
         return (x, y)
 
     #######################
@@ -88,9 +87,11 @@ class STRAT:
     def minimax(self, p_next: int) -> (tuple):
         # check if the game is over
 
-        f = self.logic.is_game_over(self.starting_player, self.state)  # starting player won
+        f = self.logic.is_game_over(
+            self.starting_player, self.state)  # starting player won
         if f is None:
-            f = self.logic.is_game_over(self.other_player, self.state)  # opposing player one
+            f = self.logic.is_game_over(
+                self.other_player, self.state)  # opposing player one
         # if game is over => we reached a leaf node
         if self.logic.GAME_OVER == True:
             self.logic.GAME_OVER = False
@@ -469,15 +470,16 @@ class STRAT:
     def longest_player_chain(self, board, player):
         return self.longest_chain(board, player)
 
-
-
     ###
-    # Dijkstra heurisitic
+    # Dijkstra heuristic
     ###
+
+    # generates the graph where opposing player's nodes are removed and the player's nodes are also removed but after
+    # connecting all the neighbors
 
     def graph_generator2(self, player: int):
         # we get the opposing player for later reference:
-        if (player == 1):
+        if player == 1:
             other_player = 2
         else:
             other_player = 1
@@ -512,51 +514,52 @@ class STRAT:
                 elif self.state[i][j] == player:
                     # get all neighbors
                     l_nei = list(self.dijkstra_graph.neighbors((i, j)))
-                    # print(l_nei)
                     for k in l_nei:
                         if self.state[k[0]][k[1]] == other_player:
                             l_nei.remove(k)
-                    # for each neigbor connect it to all the other neighbors
-                    # print("*******************************************")
-                    # print("for cell ", (i, j))
+                    # for each neighbor connect it to all the other neighbors
                     new_additions = list()
                     for k in l_nei:
                         for m in l_nei:
                             # be aware of self loops so don't connect the node to itself
                             # be aware of neighbors that were already connected
-                            if ((m[0] == k[0] and m[1] == k[1])):
+                            if m[0] == k[0] and m[1] == k[1]:
                                 continue
-                            if (self.dijkstra_graph.has_edge(m, k)):
+                            if self.dijkstra_graph.has_edge(m, k):
                                 # print("the edge already exists: ", m, k)
                                 continue
-                            if ((k, m) in new_additions):
+                            if (k, m) in new_additions:
                                 continue
                             # if all the conditions are satisfied connect the two neighbors
                             new_additions.append((m, k))
                             # self.dijkstra_graph.add_edge(m, k)
-                            # print("m is ", m, "and k is : ", k)
                     for edges_to_add in new_additions:
                         self.dijkstra_graph.add_edge(
                             edges_to_add[0], edges_to_add[1])
                     # remove the node
-                    # print("*****************************************")
                     self.dijkstra_graph.remove_node((i, j))
 
+    # dfs function used to get all the empty cells that could be reached from a side
     def get_border_spes(self, player, cell, visited, border):
-        if (player == 1):
+        if player == 1:
             other_player = 2
         else:
             other_player = 1
         cell_nei = self.logic.get_neighbours(cell)
         for nei in cell_nei:
             if self.state[nei[0]][nei[1]] != other_player:
-                if (nei not in visited):
+                if nei not in visited:
                     visited.append(nei)
-                    if (self.state[nei[0]][nei[1]] == 0):
+                    if self.state[nei[0]][nei[1]] == 0:
                         border.append(nei)
-                    elif (self.state[nei[0]][nei[1]] == player):
+                    elif self.state[nei[0]][nei[1]] == player:
                         self.get_border_spes(player, nei, visited, border)
 
+    # choosing the border points:
+    # the points chosen are either:
+    # -at the edges of the board and are empty
+    # -any empty cell which could be reached from the edge of the player's side (through cells occupied by the player)
+    # -cells occupied by the opposing player are neglected
     def get_border_points2(self, player):
         borders_1 = list()
         borders_2 = list()
@@ -565,7 +568,7 @@ class STRAT:
             for i in range(self.state.shape[0]):
                 if (i, 0) in visited:
                     continue
-                if (self.state[i][0] == 0):
+                if self.state[i][0] == 0:
                     visited.append((i, 0))
                     borders_1.append((i, 0))
                 elif self.state[i][0] == player:
@@ -573,9 +576,9 @@ class STRAT:
                     self.get_border_spes(player, (i, 0), visited, borders_1)
             visited = list()
             for i in reversed(range(self.state.shape[0])):
-                if ((i, self.state.shape[0] - 1) in visited):
+                if (i, self.state.shape[0] - 1) in visited:
                     continue
-                if (self.state[i][self.state.shape[0] - 1] == 0):
+                if self.state[i][self.state.shape[0] - 1] == 0:
                     visited.append((i, self.state.shape[0] - 1))
                     borders_2.append((i, self.state.shape[0] - 1))
                 elif self.state[i][self.state.shape[0] - 1] == player:
@@ -584,9 +587,9 @@ class STRAT:
                         player, (i, self.state.shape[0] - 1), visited, borders_2)
         else:
             for i in range(self.state.shape[0]):
-                if ((0, i) in visited):
+                if (0, i) in visited:
                     continue
-                if (self.state[0][i] == 0):
+                if self.state[0][i] == 0:
                     visited.append((0, i))
                     borders_1.append((0, i))
                 elif self.state[0][i] == player:
@@ -594,9 +597,9 @@ class STRAT:
                     self.get_border_spes(player, (0, i), visited, borders_1)
             visited = list()
             for i in reversed(range(self.state.shape[0])):
-                if ((self.state.shape[0] - 1, i) in visited):
+                if (self.state.shape[0] - 1, i) in visited:
                     continue
-                if (self.state[self.state.shape[0] - 1][i] == 0):
+                if self.state[self.state.shape[0] - 1][i] == 0:
                     visited.append(
                         (self.state.shape[0] - 1, i))
                     borders_2.append((self.state.shape[0] - 1, i))
@@ -604,14 +607,14 @@ class STRAT:
                     visited.append((self.state.shape[0] - 1, i))
                     self.get_border_spes(
                         player, (self.state.shape[0] - 1, i), visited, borders_2)
-        return (borders_1, borders_2)
+        return borders_1, borders_2
 
+    # function that finds the shortest distance needed to one (number of steps needed to win)
     def dijkstra(self, player):
         first_side = list()
         second_side = list()
-        first_side, second_side = self.get_border_points2(player)
-        # first_side = self.border_editor(first_side, player)
-        # second_side = self.border_editor(second_side, player)
+        first_side, second_side = self.get_border_points2(
+            player)  # get the borders from each opposite side
         (x, y) = (None, None)
         min_val = float('inf')
         for i in range(len(first_side)):
@@ -628,19 +631,14 @@ class STRAT:
         # if end game is reached return
         f = self.logic.is_game_over(self.starting_player, self.state)
         if f is None:
-            # print("L")
             f = self.logic.is_game_over(self.other_player, self.state)
-            # print(f)
-        # possible stack overflow problem
-        # print(f)
         # if game is over => we reached a leaf node
         if self.logic.GAME_OVER == True:
-            # self.turn_state = not self.turn_state
             self.logic.GAME_OVER = False
-            # we should try minimax for each player
             # if neither player won:
             if f is None:
-                return (-0.5, None)  # less better than equal pathes
+                # worse than both players having equally sized paths to win
+                return (-0.5, None)
             # if starting player won:
             elif f == self.starting_player:
                 return (5, None)
@@ -649,54 +647,35 @@ class STRAT:
                 return (2, None)
         # if not make all choices
         elif depth == max_depth:
-            # call graph generation: depending on which player's turn
+            # generating the graph for the first player
             self.graph_generator2(self.starting_player)
-            # call dijkstra for the first
+            # call shortest path for the starting player
             first = self.dijkstra(self.starting_player)
+            # generating the graph for the opposing player
             self.graph_generator2(self.other_player)
+            # call shortest path for the opposing player
             second = self.dijkstra(self.other_player)
-            # call dijkstra for the second
-            # print("************************")
-            # print("first is: ", first)
-            # print("the second is: ", second)
-            # print("************************")
-            # compare the two and return a score
-            return (-first, None)
+            return (second - first, None)
         else:
             l = self.logic.get_possible_moves(
                 self.state)  # finds all the possible moves
             if self.turn_state == True:
                 self.turn_state = not self.turn_state
                 the_m = - inf  # check if it works
-                # in case we are in level 0
                 if (depth == 0):
+                    # self.graph_generator2(self.starting_player)
+                    # nx.draw(self.dijkstra_graph, with_labels=True)
+                    # plt.show()
                     m = 0
                     res_t = (None, None)
                     for i in l:
                         self.state[i[0]][i[1]] = self.starting_player
-                        print("******************************************")
-                        print("the other player chose the following path: ")
                         m = self.search_with_heuristic(depth + 1, max_depth)[0]
-                        print("for : ", i, "we get the distance ", m)
-                        print("*****************************************")
-                        # if(m == -1):
-                        #     print("we can go to ", i)
-                        # we can implement random to choose any
-                        # print("m is", m)
                         if (the_m < m):
                             the_m = m
                             res_t = i
                         self.state[i[0]][i[1]] = 0
-
                     self.turn_state = not self.turn_state
-                    # print(res_t)
-                    first_side, second_side = self.get_border_points2(
-                        self.starting_player)
-                    # print("*******************************************")
-                    # print(first_side)
-                    # print(second_side)
-                    # print("*****************************************")
-
                     return res_t
                 else:
                     for i in l:
@@ -705,50 +684,22 @@ class STRAT:
                         the_m = max(the_m, self.search_with_heuristic(
                             depth + 1, max_depth)[0])
                         self.state[i[0]][i[1]] = 0
-                    print("the chosen m is : ", the_m)
 
             # it is the opposing player's turn:
             else:
-                # to be removed#
-                # *********************************************************#
-                self.turn_state = not self.turn_state
                 the_m = inf
+                self.turn_state = not self.turn_state
                 m = 0
-                res_t = (None, None)
                 for i in l:
+                    # print(the_m)
                     self.state[i[0]][i[1]] = self.other_player
-                    m = self.search_with_heuristic(depth + 1, max_depth)[0]
-                    # if(m == -1):
-                    #     print("we can go to ", i)
-                    # we can implement random to choose any
-                    # print("m is", m)
-                    if (the_m > m):
-                        the_m = m
-                        res_t = i
+                    # print(self.state[i[0]][i[1]])
+                    the_m = min(the_m, self.search_with_heuristic(
+                        depth + 1, max_depth)[0])
                     self.state[i[0]][i[1]] = 0
-                print("the chosen m is: ", res_t)
-
-                # *********************************************************#
-                # the_m = inf
-                # self.turn_state = not self.turn_state
-                # m = 0
-                # # this won't be accessed most of the time
-                # # I will remove the p_next == 0 since it is never used
-                # # could be accessed at the end
-                # for i in l:
-                #     # print(the_m)
-                #     self.state[i[0]][i[1]] = self.other_player
-                #     # print(self.state[i[0]][i[1]])
-                #     the_m = min(the_m, self.search_with_heuristic(
-                #         depth + 1, max_depth)[0])
-                #     self.state[i[0]][i[1]] = 0
             self.turn_state = not self.turn_state
-            return (the_m, None)
+            return (the_m, None)  ######
 
-
-
-
-    ######
     # Heuristic play function to test the heuristic without going into minimax
     ###
     def play_heuristic(self, root_node, heuristic):
